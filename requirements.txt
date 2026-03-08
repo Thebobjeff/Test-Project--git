@@ -1,0 +1,6 @@
+langchain-groq
+langchain-core
+langchain-community
+python-dotenv
+unstructured[md]
+spacy
