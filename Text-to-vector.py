@@ -5,7 +5,7 @@ import numpy as np
 
 # Converting text to vectors using the Sentence Transformers (ST) library
 
-sentences = ["Machine learning is fascinating!", "AI is intriguing!"]
+sentences = ["Machine learning is fascinating!", "My fav color is blue."]
 
 sentence1 = sentences[0]
 sentence2 = sentences[1]
