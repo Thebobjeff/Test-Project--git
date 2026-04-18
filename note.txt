@@ -1,0 +1,2 @@
+new scourse for songs and arttist
+https://pypi.org/project/billboard.py/#description
