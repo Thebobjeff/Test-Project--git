@@ -10,12 +10,12 @@ token = os.getenv("client_access_token")
 
 # Initialize Genius with optimized settings
 genius = lyricsgenius.Genius(token)
-genius.verbose = False 
+genius.verbose = False
 genius.remove_section_headers = True
 genius.skip_non_songs = True  # Prevents downloading tracklists or liner notes
 
-input_file = 'test.csv'
-output_file = 'updateTestFile1.csv'
+input_file = 'hooks/test.csv'
+output_file = 'hooks/updateTestFile1.csv'
 
 def fetch_lyrics_task(row):
     """
@@ -24,35 +24,43 @@ def fetch_lyrics_task(row):
     """
     artist = row['Artist']
     song_title = row['Song']
-    
+
     # Clean up song titles that have movie info like (From "Young Guns II")
     # This helps Genius find the song more accurately
     clean_song = song_title.split(' (From ')[0]
-    
+
+    # FIX 1: Define defaults BEFORE the try block so they always exist,
+    # even if an exception is thrown and we jump straight to except.
+    lyrics = "Lyrics Not Found"
+    tags = "Unknown"
+
     try:
         # Searching by (song, artist) is faster and more accurate than a single string
         result = genius.search_song(clean_song, artist)
-        lyrics = result.lyrics if result else "Lyrics Not Found"
+        if result:
+            lyrics = result.lyrics
+            # Pull genre tags from the raw Genius API response body
+            raw_tags = result._body.get("tags", [])
+            tags = ", ".join(t.get("name", "") for t in raw_tags) if raw_tags else "Unknown"
     except Exception as e:
-        lyrics = "Song Not Found Bucko"
-        # lyrics = f"Error: {str(e)}"
-    
-    # Replace newlines with a pipe and spaces
+        lyrics = "Song Not Found"
+        tags = "Unknown"
+
+    # Replace newlines with a pipe — always safe now since lyrics has a default
     clean_lyrics = lyrics.replace("\n", " | ")
 
-
-    # Return the original data plus the new lyrics column
-    return {**row, 'Lyrics': clean_lyrics}
+    # Return the original row data plus the two new columns
+    return {**row, 'Lyrics': clean_lyrics, 'Tags': tags}
 
 def main():
     # 1. Read the file using DictReader
     # DictReader AUTOMATICALLY skips the header and uses it for keys
     with open(input_file, mode='r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
-        
-        # We grab the fieldnames (headers) and add 'Lyrics' to the list
-        fieldnames = reader.fieldnames + ['Lyrics']
-        
+
+        # FIX 2: Add 'Tags' to fieldnames so the DictWriter knows about it
+        fieldnames = reader.fieldnames + ['Lyrics', 'Tags']
+
         # Convert to a list so ThreadPoolExecutor can process it
         rows = list(reader)
 
@@ -69,6 +77,7 @@ def main():
         writer.writerows(final_results)
 
     print(f"Successfully created: {output_file}")
-    
+
 if __name__ == "__main__":
     main()
+
