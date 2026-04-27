@@ -29,8 +29,7 @@ def fetch_lyrics_task(row):
     # This helps Genius find the song more accurately
     clean_song = song_title.split(' (From ')[0]
 
-    # FIX 1: Define defaults BEFORE the try block so they always exist,
-    # even if an exception is thrown and we jump straight to except.
+    # Define defaults BEFORE the try block so they always exist,
     lyrics = "Lyrics Not Found"
     tags = "Unknown"
 

@@ -7,13 +7,6 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
-# ============================================================
-# fetchGenre.py  —  Genre classification via Groq + LangChain
-#
-# Uses the same Groq setup from your externalDataTest.py.
-# Sends artists in batches of 50, gets back a JSON dict,
-# then maps genres onto every row in the CSV.
-# ============================================================
 
 load_dotenv()
 
@@ -95,7 +88,7 @@ def main():
         result = classify_artists_batch(batch)
         genre_map.update(result)
         print(f"  Sample: {list(result.items())[:2]}")
-        time.sleep(0.3)  # Small pause to be polite to the API
+        time.sleep(0.3)  # Small pause
 
     # 3. Map genres back onto every row
     results = []
